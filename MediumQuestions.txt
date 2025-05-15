@@ -1,0 +1,10 @@
+1,What can you hear but not see or touch even though you control it?,Your voice,The wind,An echo,A
+2,I fly without wings I cry without eyes. Wherever I go darkness follows me. What am I?,A cloud,A shadow,A storm,C
+3,The more you take the more you leave behind. What am I?,Time,Memories,Footsteps,C
+4,I have cities but no houses forests but no trees and rivers but no water. What am I?,A puzzle,A map,A painting,B
+5,What flowers are kissable?,Roses,Tulips,Peonies,B
+6,What has one eye but cannot see?,A needle,A storm,A potato,A
+7,What begins with T ends with T and has T in it?,A teapot,A trumpet,A tent,A
+8,What comes once in a minute twice in a moment but never in a thousand years?,The sun,The letter M,A second,B
+9,What invention lets you look right through a wall?,A mirror,A window,A door,B
+10,What kind of room has no doors or windows?,A dark room,A mushroom,A classroom,B

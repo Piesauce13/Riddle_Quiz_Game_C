@@ -1,0 +1,10 @@
+1,What has to be broken before you can use it?,An egg,A mirror,A pencil,A
+2,What month of the year has 28 days?,February,All of them,April,B
+3,What is full of holes but still holds water?,A sponge,A net,A bucket,A
+4,What has four wheels and flies?,A garbage truck,An airplane,A race car,A
+5,What has a bottom at the top?,A leg,A hat,A chair,A
+6,What gets wetter the more it dries?,A towel,A sponge,A cloud,A
+7,What has hands but cannot clap?,A clock,A robot,A ghost,A
+8,What can you catch but not throw?,A ball,A cold,A yawn,B
+9,What goes up but never comes down?,Smoke,Age,Balloon,B
+10,What belongs to you but others use it more than you do?,Your phone,Your name,Your clothes,B

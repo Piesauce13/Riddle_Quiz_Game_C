@@ -1,0 +1,10 @@
+1,I'm clean when I'm black dirty when white; Get too close and you might sneeze. What am I?,A chalkboard,A newspaper,Ashes,A
+2,A very pretty thing I am fluttering in the pale-blue sky. Delicate fragile on the wing indeed I am a pretty thing. What am I?,A feather,A snowflake,A butterfly,C
+3,Tool of thief toy of queen. Always used to be unseen. Sign of joy sign of sorrow. Giving all likeness borrowed. What am I?,A mask,A shadow,A veil,A
+4,It's been around for millions of years but is never more than a month old. What is it?,A tree,The moon,A comet,B
+5,They come out at night without being called and are lost in the day without being stolen. What are they?,Fireflies,Dreams,Stars,C
+6,I speak without a mouth and hear without ears. I have nobody but I come alive with wind. What am I?,An echo,A shadow,A cloud,A
+7,The person who makes it has no need of it. The person who buys it doesn't use it. The person who uses it doesn't know it. What is it?,A bed,A coffin,A parachute,B
+8,Forward I am heavy but backward I am not. What am I?,A ton,A shadow,A secret,A
+9,You measure my life in hours and I serve you by expiring. I'm quick when I'm thin and slow when I'm fat. What am I?,A candle,A clock,A fire,A
+10,I have keys but no locks I have space but no room. You can enter but can't go outside. What am I?,A keyboard,A code,A dream,A
