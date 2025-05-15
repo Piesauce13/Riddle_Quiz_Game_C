@@ -1,0 +1,15 @@
+Easy,What has to be broken before you can use it?,An egg,A mirror,A pencil,A
+Easy,What month of the year has 28 days?,February,All of them,April,B
+Easy,What is full of holes but still holds water?,A sponge,A net,A bucket,A
+Easy,What has four wheels and flies?,A garbage truck,An airplane,A race car,A
+Easy,What has a bottom at the top?,A leg,A hat,A chair,A
+Medium,What can you hear but not see or touch even though you control it?,Your voice,The wind,An echo,A
+Medium,I fly without wings I cry without eyes. Wherever I go darkness follows me. What am I?,A cloud,A shadow,A storm,C
+Medium,The more you take the more you leave behind. What am I?,Time,Memories,Footsteps,C
+Medium,I have cities but no houses forests but no trees and rivers but no water. What am I?,A puzzle,A map,A painting,B
+Medium,What flowers are kissable?,Roses,Tulips,Peonies,B
+Hard,I'm clean when I'm black dirty when white; Get too close and you might sneeze. What am I?,A chalkboard,A newspaper,Ashes,A
+Hard,A very pretty thing I am fluttering in the pale-blue sky. Delicate fragile on the wing indeed I am a pretty thing. What am I?,A feather,A snowflake,A butterfly,C
+Hard,Tool of thief toy of queen. Always used to be unseen. Sign of joy sign of sorrow. Giving all likeness borrowed. What am I?,A mask,A shadow,A veil,A
+Hard,It's been around for millions of years but is never more than a month old. What is it?,A tree,The moon,A comet,B
+Hard,They come out at night without being called and are lost in the day without being stolen. What are they?,Fireflies,Dreams,Stars,C
