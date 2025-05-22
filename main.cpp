@@ -22,17 +22,17 @@ void showWelcomeScreen() {
         printf("\nDo you have an account yet? (Yes/No): ");
         fgets(response, sizeof(response), stdin);
         response[strcspn(response, "\n")] = '\0';  // Remove newline
+        toLowerCase(response);
 
         if (strcmp(response, "Yes") == 0 || strcmp(response, "Y") == 0) {
             char username[50];
-            // Login function can return the username
-            // If successful, call showMainMenu
-            // For now, hardcoding a username
+            if (login(users, *userCount, username)) {
+                showMainMenu(username);
+            }
             strcpy(username, "User1"); // This should be part of login functionality
             showMainMenu(username);
         } else if (strcmp(response, "No") == 0 || strcmp(response, "N") == 0) {
-            // Sign up function
-            // loadUsers, saveUsers etc.
+            signUp(users, userCount);
         } else {
             printf("Invalid input. Please enter 'Yes' or 'No'.\n");
         }
@@ -95,6 +95,11 @@ void saveUsers() {
 
     // Save users logic
     fclose(file);
+
+void toLowerCase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower((unsigned char)str[i]);
+    }
 }
 
 // TIP See CLion help at <a
