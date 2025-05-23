@@ -1,9 +1,8 @@
-//
-// Created by Asus on 5/15/2025.
-//
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
-<<<<<<< Updated upstream
-=======
 // Preprocessor
 #define MAX_PLAYERS 100
 #define USERNAME_LEN 50
@@ -165,4 +164,3 @@ int changeUsername(const char* oldUsername, const char* newUsername) {
     return 0; // failure: old username not found
 }
 /*/
->>>>>>> Stashed changes
