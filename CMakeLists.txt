@@ -9,7 +9,6 @@ link_directories(/opt/homebrew/opt/openssl@3/lib)
 
 add_executable(Riddle_Quiz_Game_Test main.c
         UserManager.h
-        Question.h
         QuizManager.h
         Leaderboard.h)
 
