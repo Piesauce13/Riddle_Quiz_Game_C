@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+// Preprocessor
 #define MAX_PLAYERS 100
 #define USERNAME_LEN 50
 #define TIMESTAMP_LEN 30
