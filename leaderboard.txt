@@ -1,2 +1,9 @@
 pisos, 8, 146.25
 panha, 8, 82.27 
+hey, 5, 8.21 
+a, 6, 3.81 
+pisoto, 3, 5.09 
+pisoto, 3, 3.16 
+joe, 5, 3.67 
+joe, 3, 3.60 
+hello, 5, 5.43 
