@@ -1,2 +1,5 @@
-pisos, 8, 146.25
-panha, 8, 82.27 
+adele, 8, 41.97
+katy, 3, 5.81
+panha, 3, 6.53
+Piesauce, 8, 151.09
+Chan, 9, 26.75

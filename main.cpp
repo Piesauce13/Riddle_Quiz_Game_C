@@ -1,57 +1,70 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <time.h>
 #include "QuizManager.h"
+#include "UserManager.h"
+#include "Leaderboard.h"
 
-void showWelcomeScreen();
-void showMainMenu(const char *username);
-int loadUsers();
-void saveUsers();
+// Global variables for leaderboard
+char username[50];
+int score = 0;
+double timeTaken = 0.0;
+
+void showWelcomeScreen(User *users, int *userCount);
+void showMainMenu(User *users, int *userCount, const char *username);
+void toLowerCase(char *str);
 
 int main() {
-    loadUsers();
-    showWelcomeScreen();
+    User users[MAX_USERS];
+    int userCount = 0;
+
+    srand((unsigned int)time(NULL));  // Initialize random seed for salt generation
+    userCount = loadUsers(users);     // Load existing users at startup
+    showWelcomeScreen(users, &userCount);
     return 0;
 }
 
-void showWelcomeScreen() {
+void showWelcomeScreen(User *users, int *userCount) {
     char response[10];
     printf("---------------------- Welcome to Riddle Quiz Game! ----------------------\n");
     printf("\"Test yourself with challenging riddles across different difficulty levels.\"\n");
+    pause();
 
     while (1) {
         printf("\nDo you have an account yet? (Yes/No): ");
         fgets(response, sizeof(response), stdin);
         response[strcspn(response, "\n")] = '\0';  // Remove newline
+        toLowerCase(response);
 
-        if (strcmp(response, "Yes") == 0 || strcmp(response, "Y") == 0) {
-            char username[50];
-            // Login function can return the username
-            // If successful, call showMainMenu
-            // For now, hardcoding a username
-            strcpy(username, "User1"); // This should be part of login functionality
-            showMainMenu(username);
-        } else if (strcmp(response, "No") == 0 || strcmp(response, "N") == 0) {
-            // Sign up function
-            // loadUsers, saveUsers etc.
+        if (strcmp(response, "yes") == 0 || strcmp(response, "y") == 0) {
+            if (login(users, *userCount, username)) {
+                showMainMenu(users, userCount, username);
+            } else {
+                printf("Login failed. Please try again.\n");
+            }
+        } else if (strcmp(response, "no") == 0 || strcmp(response, "n") == 0) {
+            signUp(users, userCount);
         } else {
             printf("Invalid input. Please enter 'Yes' or 'No'.\n");
         }
     }
 }
 
-void showMainMenu(const char *username) {
+void showMainMenu(User *users, int *userCount, const char *username) {
     int choice;
 
     while (1) {
-        printf("\n\n                                Main Menu                                \n");
+        clearConsole();
+        printf("                                Main Menu                                \n");
         printf("1. Play Quiz\n");
         printf("2. View Leaderboard\n");
         printf("3. Edit Profile\n");
         printf("4. Logout\n");
         printf("Choose an option: ");
         scanf("%d", &choice);
-        getchar(); // to consume the newline character
+        getchar(); // consume newline
 
         switch (choice) {
             case 1: {
@@ -63,21 +76,22 @@ void showMainMenu(const char *username) {
                 loadQuestions("MediumQuestions.txt", medium, &mCount);
                 loadQuestions("HardQuestions.txt", hard, &hCount);
 
-                char username[50];
-                printf("Enter your username: ");
-                scanf("%s", username);
-
                 playQuiz(username, easy, eCount, medium, mCount, hard, hCount);
+                // Save score to leaderboard after quiz
+                // saveLeaderboard();
                 break;
             }
-            case 2:
+            case 2: {
                 printf("Viewing Leaderboard...\n");
-                // Call leaderboard display function
+                showLeaderboard();
+                pause();
                 break;
-            case 3:
-                printf("Editing Profile...\n");
-                // Call profile edit function
+            }
+            case 3: {
+                editProfile(users, userCount, (char *)username);
+                saveUsers(users, *userCount);
                 break;
+            }
             case 4:
                 printf("Logging out... Goodbye, %s!\n", username);
                 return;
@@ -87,30 +101,8 @@ void showMainMenu(const char *username) {
     }
 }
 
-int loadUsers() {
-    FILE *file = fopen("users.txt", "r");
-    if (!file) {
-        printf("No previous user data found. Starting fresh.\n");
-        return 0;
+void toLowerCase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower((unsigned char)str[i]);
     }
-
-    // Load users logic
-    fclose(file);
-    return 1;
 }
-
-void saveUsers() {
-    FILE *file = fopen("users.txt", "w");
-    if (!file) {
-        printf("Error saving users.\n");
-        return;
-    }
-
-    // Save users logic
-    fclose(file);
-}
-
-// TIP See CLion help at <a
-// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
-//  Also, you can try interactive lessons for CLion by selecting
-//  'Help | Learn IDE Features' from the main menu.

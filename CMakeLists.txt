@@ -3,9 +3,11 @@ project(Riddle_Quiz_Game_Test)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(OpenSSL REQUIRED)
+
 add_executable(Riddle_Quiz_Game_Test main.cpp
         UserManager.h
         Question.h
         QuizManager.h
         Leaderboard.h
-        QuizManagerTest.cpp)
+)
