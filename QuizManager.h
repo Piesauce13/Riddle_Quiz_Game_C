@@ -10,12 +10,8 @@ typedef struct {
     char optionA[50];
     char optionB[50];
     char optionC[50];
-    char correctAnswer; // 'A', 'B', or 'C'
+    char correctAnswer;
 } Question;
-
-void loadQuestions(const char *filename, Question *questions, int *count);
-void playQuiz(const char *username, Question *easy, int eCount, Question *medium, int mCount, Question *hard, int hCount);
-int askQuestions(const char *levelName, Question *questions, int count, int startQNum, int *quitFlag);
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,8 +28,13 @@ void clearConsole() {
 }
 
 void pause() {
-    printf("\n\nPress Enter to continue...");
-    while (getchar() != '\n'); // To consume leftover newline
+    printf("\n\n\nPress Enter to continue...");
+    getchar(); // Wait for Enter
+}
+
+void pause2() {
+    printf("\n\n\nPress Enter to continue...");
+    while(getchar() != '\n');
     getchar(); // Wait for Enter
 }
 
@@ -74,22 +75,32 @@ int askQuestions(const char *levelName, Question *questions, int count, int star
     int correct = 0;
     char userAnswer;
 
-    printf("===== %s LEVEL =====\n", levelName);
+    printf("\n\n===== %s LEVEL =====\n\n", levelName);
     for (int i = 0; i < 3 && i < count; i++) {
-        printf("Q%d: %s\n", startQNum + i, questions[i].question);
+        printf("Q%d: %s\n\n", startQNum + i, questions[i].question);
         printf("A. %s\n", questions[i].optionA);
         printf("B. %s\n", questions[i].optionB);
         printf("C. %s\n", questions[i].optionC);
-        printf("Your answer (A/B/C or Q to quit): ");
-        scanf(" %c", &userAnswer);
 
-        if (userAnswer == 'q' || userAnswer == 'Q') {
+        while (1) { // Input validation loop
+            printf("\nYour answer (A/B/C or Q to quit): ");
+            scanf(" %c", &userAnswer);
+            userAnswer = tolower(userAnswer);
+
+            if (userAnswer == 'a' || userAnswer == 'b' || userAnswer == 'c' || userAnswer == 'q') {
+                break; // Valid input
+            } else {
+                printf("Invalid choice. Please enter A, B, C, or Q.\n");
+            }
+        }
+
+        if (userAnswer == 'q') {
             printf("\nYou chose to quit. Your progress will not be saved.\n");
             *quitFlag = 1;
             return 0;
         }
 
-        if (userAnswer == questions[i].correctAnswer || userAnswer == questions[i].correctAnswer + 32) {
+        if (tolower(questions[i].correctAnswer) == userAnswer) {
             printf("Correct!\n\n");
             correct++;
         } else {
@@ -99,7 +110,7 @@ int askQuestions(const char *levelName, Question *questions, int count, int star
 
     printf("You have finished the %s level.\n", levelName);
     printf("Score for this level: %d/3\n\n", correct);
-    pause();
+    pause2();
     return correct;
 }
 
@@ -111,12 +122,20 @@ void playQuiz(const char *username, Question *easy, int eCount, Question *medium
 
     int score = 0;
     int quitFlag = 0;
-    clock_t start = clock();
 
     clearConsole();
-    printf("Welcome, %s! Let's start the quiz.\n", username);
-    printf("You can type 'Q' at any time to quit (your score will not be saved).\n\n");
+    printf("Welcome, %s! Let's start the quiz.\n\n", username);
+    printf("|///////////////////////////////////////////////////////////|\n");
+    printf("|                                                           |\n");
+    printf("|            Get ready to challenge your brain!             |\n");
+    printf("|                                                           |\n");
+    printf("|      You can type 'Q' at any time to quit (your score     |\n");
+    printf("|                  will not be saved).                      |\n");
+    printf("|                                                           |\n");
+    printf("|///////////////////////////////////////////////////////////|\n\n");
     pause();
+
+    clock_t start = clock();
 
     score += askQuestions("EASY", easy, eCount, 1, &quitFlag);
     if (quitFlag) return;
@@ -130,9 +149,8 @@ void playQuiz(const char *username, Question *easy, int eCount, Question *medium
     clock_t end = clock();
     double timeTaken = (double)(end - start) / CLOCKS_PER_SEC;
 
-    // Check if user already exists and has a higher score
     FILE *leaderboard = fopen("leaderboard.txt", "r");
-    int highScore = -1;  // Assume no previous score
+    int highScore = -1;
     double bestTime = 0.0;
 
     if (leaderboard) {
@@ -152,30 +170,27 @@ void playQuiz(const char *username, Question *easy, int eCount, Question *medium
     }
 
     if (highScore == -1) {
-        // User not found, add new entry
         FILE *appendFile = fopen("leaderboard.txt", "a");
         if (appendFile) {
             fprintf(appendFile, "%s, %d, %.2f\n", username, score, timeTaken);
             fclose(appendFile);
-            printf("New score added to leaderboard!\n");
+            printf("\nNew score added to leaderboard!\n");
         } else {
-            printf("Could not write to leaderboard.txt\n");
+            printf("\nCould not write to leaderboard.txt\n");
         }
     } else if (score > highScore || (score == highScore && timeTaken < bestTime)) {
-        // New high score or better time at the same score, update leaderboard
-        char timeStr[20];
-        snprintf(timeStr, sizeof(timeStr), "%.2f", timeTaken);
-        updateScore((char *)username, score, timeStr);
-        printf("High score updated on leaderboard!\n");
+        updateScore((char *)username, score, timeTaken);
+        printf("\n\nHigh score updated on leaderboard!\n");
     } else {
-        // No new high score
-        printf("You did not beat your previous high score of %d.\n", highScore);
+        printf("\n\nYou did not beat your previous high score of %d.\n", highScore);
     }
 
-    printf("Quiz complete! You got %d out of 9 correct.\n", score);
-    printf("Time taken: %.2f seconds\n", timeTaken);
+    printf("\n\n==============================================================\n");
+    printf("QUIZ COMPLETE! \n\n");
+    printf("CORRECT ANSWERS: %d out of 9\n", score);
+    printf("TIME TAKEN: %.2f seconds\n", timeTaken);
+    printf("==============================================================\n");
     pause();
 }
 
-
-#endif //QUIZMANAGER_H
+#endif

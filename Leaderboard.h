@@ -4,19 +4,19 @@
 #include <string.h>
 #include <stdlib.h>
 
-// Global variables
 extern char username[50];
 extern int score;
 extern double timeTaken;
 
-// Function prototypes
 void loadLeaderboard();
 void saveLeaderboard();
 void updateScore(char* username, int newScore, const char* newTimeTaken);
-void updateUsername(const char* newUsername, int score, const char* timeTaken);
+void updateUsernameInLeaderboard(const char* newUsername, int score, double timeTaken);
 void showLeaderboard();
-int compareScores(); // this is to compare score, and write the highest score in (idk if we need or not)
-void updateLeaderbaord(); // idk if we gonna need this or not.
+void showUserHighscore();
+int compareScores();
+void updateLeaderbaord();
+void deleteUserFromLeaderboard(const char *username);
 
 void loadLeaderboard() {
     FILE *leaderboard = fopen("leaderboard.txt", "r");
@@ -37,104 +37,124 @@ void saveLeaderboard() {
     fclose(leaderboard);
 }
 
-void updateScore(char* username, int newScore, const char* newTimeTaken) {
-    FILE *leaderboard = fopen("leaderboard.txt", "r");
-    if (!leaderboard) {
-        printf("Failed to open leaderboard.txt for reading.\n");
-        return;
-    }
-
-    FILE *tmpfile = fopen("temp.txt", "w");
-    if (!tmpfile) {
-        printf("Failed to open temp.txt for writing.\n");
-        fclose(leaderboard);
-        return;
-    }
-
-    char buffer[256];
-    char fileUsername[50];
-    int fileScore;
-    double fileTime;
-
-    while (fgets(buffer, sizeof(buffer), leaderboard)) {
-        // Parse the line: expected format is "username, score, time"
-        if (sscanf(buffer, "%49[^,], %d, %lf", fileUsername, &fileScore, &fileTime) == 3) {
-            if (strcmp(fileUsername, username) == 0) {
-                // Match found — update the line
-                fprintf(tmpfile, "%s, %d, %s\n", username, newScore, newTimeTaken);
-            } else {
-                // Not the target user — keep the line as is
-                fputs(buffer, tmpfile);
-            }
-        } else {
-            // Line format not matched — copy as is
-            fputs(buffer, tmpfile);
-        }
-    }
-
-    fclose(leaderboard);
-    fclose(tmpfile);
-
-    // Replace the original file with updated content
-    remove("leaderboard.txt");
-    rename("temp.txt", "leaderboard.txt");
-}
-
-void updateUsername(const char* newUsername, int score, const char* timeTaken) {
-    FILE *leaderboard = fopen("leaderboard.txt", "r");
-    if (!leaderboard) {
-        printf("Failed to open leaderboard.txt for reading.\n");
-        return;
-    }
-
-    FILE *tmpfile = fopen("temp.txt", "w");
-    if (!tmpfile) {
-        printf("Failed to open temp.txt for writing.\n");
-        fclose(leaderboard);
-        return;
-    }
-
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), leaderboard)) {
-        char oldLine[256];
-        strcpy(oldLine, buffer); // Backup original line
-
-        // If the line contains the current username, replace it
-        if (strstr(buffer, username)) {
-            fprintf(tmpfile, "%s, %d, %s\n", newUsername, score, timeTaken);
-        } else {
-            fputs(oldLine, tmpfile); // Copy unchanged line
-        }
-    }
-
-    fclose(leaderboard);
-    fclose(tmpfile);
-
-    // Replace original file with updated file
-    remove("leaderboard.txt");
-    rename("temp.txt", "leaderboard.txt");
-
-    // Update global username variable
-    strcpy(username, newUsername);
-}
-
 typedef struct {
     char username[50];
     int score;
     double timeTaken;
 } LeaderboardEntry;
 
+#define MAX_LEADERBOARD_ENTRIES 100
+#define USERNAME_LEN 50
+
+void updateScore(char* username, int newScore, double newTimeTaken) {
+    LeaderboardEntry leaderboard[MAX_LEADERBOARD_ENTRIES];
+    int count = 0;
+
+    FILE *file = fopen("leaderboard.txt", "r");
+    if (!file) {
+        printf("Failed to open leaderboard.txt for reading.\n");
+        return;
+    }
+
+    // Load entries
+    while (fscanf(file, "%49[^,], %d, %lf\n",
+                  leaderboard[count].username,
+                  &leaderboard[count].score,
+                  &leaderboard[count].timeTaken) == 3) {
+        count++;
+                  }
+    fclose(file);
+
+    int found = 0;
+    for (int i = 0; i < count; i++) {
+        if (strcmp(leaderboard[i].username, username) == 0) {
+            leaderboard[i].score = newScore;
+            leaderboard[i].timeTaken = newTimeTaken;
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("Username not found in leaderboard.\n");
+        return;
+    }
+
+    file = fopen("leaderboard.txt", "w");
+    if (!file) {
+        printf("Failed to open leaderboard.txt for writing.\n");
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s, %d, %.2f\n",
+                leaderboard[i].username,
+                leaderboard[i].score,
+                leaderboard[i].timeTaken);
+    }
+
+    fclose(file);
+}
+
+
+void updateUsernameInLeaderboard(const char *oldUsername, const char *newUsername) {
+    LeaderboardEntry leaderboard[MAX_LEADERBOARD_ENTRIES];
+    int count = 0;
+
+    FILE *file = fopen("leaderboard.txt", "r");
+    if (!file) {
+        printf("Failed to open leaderboard.txt for reading.\n");
+        return;
+    }
+
+    while (fscanf(file, "%49[^,], %d, %lf\n",
+                  leaderboard[count].username,
+                  &leaderboard[count].score,
+                  &leaderboard[count].timeTaken) == 3) {
+        count++;
+        if (count >= MAX_LEADERBOARD_ENTRIES) {
+            break;
+        }
+                  }
+    fclose(file);
+
+    int found = 0;
+    for (int i = 0; i < count; i++) {
+        if (strcmp(leaderboard[i].username, oldUsername) == 0) {
+            strcpy(leaderboard[i].username, newUsername);
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("\nUsername not found in leaderboard.\n");
+        return;
+    }
+
+    file = fopen("leaderboard.txt", "w");
+    if (!file) {
+        printf("\nFailed to open leaderboard.txt for writing.\n");
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s, %d, %.2lf\n",
+                leaderboard[i].username,
+                leaderboard[i].score,
+                leaderboard[i].timeTaken);
+    }
+
+    fclose(file);
+    // printf("\nUsername updated in leaderboard successfully.\n");
+}
+
 int compareEntries(const void* a, const void* b) {
     LeaderboardEntry* entryA = (LeaderboardEntry*)a;
     LeaderboardEntry* entryB = (LeaderboardEntry*)b;
 
-    // First, sort by score (descending)
     if (entryA->score != entryB->score) {
         return entryB->score - entryA->score;
     }
 
-
-    // Then, sort by timeTaken (ascending)
     if (entryA->timeTaken < entryB->timeTaken) return -1;
     else if (entryA->timeTaken > entryB->timeTaken) return 1;
     else return 0;
@@ -147,7 +167,7 @@ void showLeaderboard() {
         return;
     }
 
-    LeaderboardEntry entries[100]; // max 100 users
+    LeaderboardEntry entries[100];
     int count = 0;
     char line[256];
 
@@ -162,21 +182,98 @@ void showLeaderboard() {
 
     fclose(leaderboard);
 
-    // Sort the entries
     qsort(entries, count, sizeof(LeaderboardEntry), compareEntries);
-
-    // Print the sorted leaderboard
-    printf("\n===== Leaderboard =====\n");
-    printf("%-5s %-20s %-10s %-10s\n", "Rank", "Username", "Score", "Time");
+    printf("\n===== Leaderboard =====\n\n");
+    printf("%-5s %-20s %-10s %-10s\n\n", "Rank", "Username", "Score", "Time");
 
     for (int i = 0; i < count && i < 10; i++) {
-        printf("%-5d %-20s %-10d %-10.2f\n",
+        printf("%-5d %-20s %-10d %-10.2f\n\n",
                i + 1,
                entries[i].username,
                entries[i].score,
                entries[i].timeTaken);
     }
 }
+
+void showUserHighscore() {
+    FILE *leaderboard = fopen("leaderboard.txt", "r");
+    if (!leaderboard) {
+        printf("No leaderboard file found.\n");
+        return;
+    }
+
+    char line[256];
+    char fileUsername[50];
+    int fileScore;
+    double fileTime;
+    int found = 0;
+
+    while (fgets(line, sizeof(line), leaderboard)) {
+        if (sscanf(line, "%49[^,], %d, %lf", fileUsername, &fileScore, &fileTime) == 3) {
+            if (strcmp(fileUsername, username) == 0) {
+                found = 1;
+                printf("\nYour Highscore:\n");
+                printf("Username : %s\n", fileUsername);
+                printf("Score    : %d\n", fileScore);
+                printf("Time     : %.2f seconds\n", fileTime);
+                break;
+            }
+        }
+    }
+
+    fclose(leaderboard);
+
+    if (!found) {
+        printf("\nYou don't have a highscore yet. Play now to set your record!\n");
+    }
+}
+
+#include "Leaderboard.h"
+
+void deleteUserFromLeaderboard(const char *username) {
+    LeaderboardEntry leaderboard[MAX_LEADERBOARD_ENTRIES];
+    int count = 0;
+
+    FILE *file = fopen("leaderboard.txt", "r");
+    if (!file) {
+        printf("Failed to open leaderboard.txt for reading.\n");
+        return;
+    }
+
+    // Load into memory
+    while (fscanf(file, "%49[^,], %d, %lf\n",
+                  leaderboard[count].username,
+                  &leaderboard[count].score,
+                  &leaderboard[count].timeTaken) == 3) {
+        count++;
+                  }
+    fclose(file);
+
+    // Filter out user's entries
+    int newCount = 0;
+    for (int i = 0; i < count; i++) {
+        if (strcmp(leaderboard[i].username, username) != 0) {
+            leaderboard[newCount++] = leaderboard[i];
+        }
+    }
+
+    // Write back
+    file = fopen("leaderboard.txt", "w");
+    if (!file) {
+        printf("Failed to open leaderboard.txt for writing.\n");
+        return;
+    }
+    for (int i = 0; i < newCount; i++) {
+        fprintf(file, "%s, %d, %.2lf\n",
+                leaderboard[i].username,
+                leaderboard[i].score,
+                leaderboard[i].timeTaken);
+    }
+    fclose(file);
+
+    printf("Deleted %s's entries from leaderboard.\n", username);
+}
+
 
 #endif
 

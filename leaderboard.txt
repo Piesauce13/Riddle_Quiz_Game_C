@@ -1,5 +1,8 @@
-adele, 8, 41.97
-katy, 3, 5.81
-panha, 3, 6.53
-Piesauce, 8, 151.09
-Chan, 9, 26.75
+Amra, 9, 43.68
+Bunchay, 7, 53.12
+Porgech, 8, 15.87
+Chentria, 9, 34.01
+Lakshmi, 9, 14.29
+Kolbotr, 9, 25.45
+Peter, 8, 19.43
+Laimeng, 8, 26.61

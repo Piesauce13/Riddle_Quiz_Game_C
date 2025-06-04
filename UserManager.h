@@ -6,13 +6,14 @@
 #include <string.h>
 #include <windows.h>
 #include <wincrypt.h>
-#include <time.h>
+#include <conio.h>
+#include "Leaderboard.h"
 
 #define MAX_USERS 100
 #define MAX_LEN 50
 #define SALT_LEN 16
 #define HASH_LEN 65
-#define USER_FILE "users_data.txt" // Use relative path for Windows portability
+#define USER_FILE "users_data.txt"
 
 typedef struct {
     char username[MAX_LEN];
@@ -21,6 +22,7 @@ typedef struct {
 } User;
 
 // Function Prototypes
+void toLowerCase(char *str);
 void generateSalt(char *salt);
 void hashPasswordWithSalt(const char *password, const char *salt, char *outputHash);
 void saveUsers(User *users, int userCount);
@@ -28,6 +30,13 @@ int loadUsers(User *users);
 void signUp(User *users, int *userCount);
 int login(User *users, int userCount, char *username);
 void editProfile(User *users, int *userCount, char *currentUsername);
+int deleteUserAccount(User *users, int *userCount, const char *currentUsername);
+
+void toLowerCase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower((unsigned char)str[i]);
+    }
+}
 
 // Generate a random salt
 void generateSalt(char *salt) {
@@ -48,45 +57,20 @@ void hashPasswordWithSalt(const char *password, const char *salt, char *outputHa
     char combined[256];
     snprintf(combined, sizeof(combined), "%s%s", salt, password);
 
-    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
-        printf("Error acquiring crypt context: %ld\n", GetLastError());
-        strcpy(outputHash, ""); // fallback to empty string
-        return;
-    }
+    CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT);
 
-    if (!CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash)) {
-        printf("Error creating hash: %ld\n", GetLastError());
-        CryptReleaseContext(hProv, 0);
-        strcpy(outputHash, "");
-        return;
-    }
+    CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash);
 
-    if (!CryptHashData(hHash, (BYTE*)combined, (DWORD)strlen(combined), 0)) {
-        printf("Error hashing data: %ld\n", GetLastError());
-        CryptDestroyHash(hHash);
-        CryptReleaseContext(hProv, 0);
-        strcpy(outputHash, "");
-        return;
-    }
+    CryptHashData(hHash, (BYTE*)combined, (DWORD)strlen(combined), 0);
 
-    if (!CryptGetHashParam(hHash, HP_HASHVAL, hash, &hashLen, 0)) {
-        printf("Error getting hash param: %ld\n", GetLastError());
-        CryptDestroyHash(hHash);
-        CryptReleaseContext(hProv, 0);
-        strcpy(outputHash, "");
-        return;
-    }
+    CryptGetHashParam(hHash, HP_HASHVAL, hash, &hashLen, 0);
 
     for (DWORD i = 0; i < hashLen; i++) {
         sprintf(outputHash + (i * 2), "%02x", hash[i]);
     }
     outputHash[hashLen * 2] = '\0';
-
-    CryptDestroyHash(hHash);
-    CryptReleaseContext(hProv, 0);
 }
 
-// Save users to file
 void saveUsers(User *users, int userCount) {
     FILE *file = fopen(USER_FILE, "w");
     if (!file) {
@@ -105,7 +89,6 @@ void saveUsers(User *users, int userCount) {
     fclose(file);
 }
 
-// Load users from file
 int loadUsers(User *users) {
     FILE *file = fopen(USER_FILE, "r");
     if (!file) return 0;
@@ -130,27 +113,57 @@ int loadUsers(User *users) {
     return count;
 }
 
-// Sign up function
+// Secure password input with * masking
+void getPassword(char *password, size_t maxLength) {
+    int i = 0;
+    char ch;
+    while (i < maxLength - 1 && (ch = _getch()) != '\r') {
+        if (ch == '\b') {
+            if (i > 0) {
+                i--;
+                printf("\b \b");
+            }
+        } else {
+            password[i++] = ch;
+            printf("*");
+        }
+    }
+    password[i] = '\0';
+    printf("\n");
+}
+
 void signUp(User *users, int *userCount) {
     if (*userCount >= MAX_USERS) {
         printf("Maximum number of users reached.\n");
         return;
     }
 
-    char username[MAX_LEN], password[MAX_LEN];
-    char salt[SALT_LEN + 1], passwordHash[HASH_LEN];
+    char username[MAX_LEN], password[MAX_LEN], confirmPassword[MAX_LEN], salt[SALT_LEN + 1], passwordHash[HASH_LEN];
 
-    printf("Create a username: ");
+    printf("\nCreate a username: ");
     scanf("%s", username);
-    printf("Create a password: ");
-    scanf("%s", password);
-    getchar(); // consume newline
+    getchar();
 
-    // Check for existing username
+    // Check if username already exists
     for (int i = 0; i < *userCount; i++) {
         if (strcmp(users[i].username, username) == 0) {
-            printf("Username already exists. Try again.\n");
+            printf("\nUsername already exists. Try again.\n");
             return;
+        }
+    }
+
+    // Password entry and confirmation loop
+    while (1) {
+        printf("\nCreate a password: ");
+        getPassword(password, sizeof(password));
+
+        printf("\nConfirm your password: ");
+        getPassword(confirmPassword, sizeof(confirmPassword));
+
+        if (strcmp(password, confirmPassword) == 0) {
+            break;
+        } else {
+            printf("\nPasswords do not match. Please try again.\n");
         }
     }
 
@@ -163,43 +176,41 @@ void signUp(User *users, int *userCount) {
     (*userCount)++;
 
     saveUsers(users, *userCount);
-    printf("Account created successfully! You can now log in.\n");
+    printf("\nAccount created successfully!\n");
+    pause();
 }
 
-// Login function
 int login(User *users, int userCount, char *username) {
-    char inputUsername[MAX_LEN], inputPassword[MAX_LEN];
-    char computedHash[HASH_LEN];
+    char inputUsername[MAX_LEN], inputPassword[MAX_LEN], computedHash[HASH_LEN];
 
-    printf("Username: ");
+    printf("\nUsername: ");
     scanf("%s", inputUsername);
-    printf("Password: ");
-    scanf("%s", inputPassword);
     getchar(); // consume newline
+    printf("\nPassword: ");
+    getPassword(inputPassword, sizeof(inputPassword));
 
     for (int i = 0; i < userCount; i++) {
         if (strcmp(users[i].username, inputUsername) == 0) {
             hashPasswordWithSalt(inputPassword, users[i].salt, computedHash);
-
             if (strcmp(users[i].passwordHash, computedHash) == 0) {
                 strcpy(username, inputUsername);
-                printf("Login successful! Welcome, %s.\n", username);
+                printf("\nLogin successful! Welcome, %s.\n", username);
+                pause();
+
                 return 1;
             }
         }
     }
-
-    printf("Incorrect username or password.\n");
+    printf("\nIncorrect username or password.\n");
+    pause();
     return 0;
 }
 
-// Now add this function definition (after login)
 void editProfile(User *users, int *userCount, char *currentUsername) {
     int choice;
-    char newUsername[MAX_LEN];
-    char newPassword[MAX_LEN];
-    char newSalt[SALT_LEN + 1];
-    char newHash[HASH_LEN];
+    char newUsername[MAX_LEN], newPassword[MAX_LEN], confirmPassword[MAX_LEN];
+    char currentPassword[MAX_LEN];
+    char newSalt[SALT_LEN + 1], newHash[HASH_LEN];
 
     int userIndex = -1;
     for (int i = 0; i < *userCount; i++) {
@@ -208,27 +219,25 @@ void editProfile(User *users, int *userCount, char *currentUsername) {
             break;
         }
     }
-
     if (userIndex == -1) {
-        printf("User not found.\n");
+        printf("\nUser not found.\n");
         return;
     }
 
     while (1) {
-        printf("\nEdit Profile Menu\n");
+        printf("\nEdit Profile Menu\n\n");
         printf("1. Change Username\n");
         printf("2. Change Password\n");
-        printf("3. Back to Main Menu\n");
+        printf("3. Back to Main Menu\n\n");
         printf("Choose an option: ");
         scanf("%d", &choice);
         getchar(); // consume newline
 
         if (choice == 1) {
-            printf("Enter new username: ");
+            printf("\nEnter new username: ");
             scanf("%s", newUsername);
             getchar(); // consume newline
 
-            // Check if new username already exists
             int exists = 0;
             for (int i = 0; i < *userCount; i++) {
                 if (strcmp(users[i].username, newUsername) == 0) {
@@ -236,38 +245,113 @@ void editProfile(User *users, int *userCount, char *currentUsername) {
                     break;
                 }
             }
-
             if (exists) {
-                printf("Username already exists. Try another one.\n");
+                printf("\nUsername already exists. Try another.\n");
             } else {
+                updateUsernameInLeaderboard(currentUsername, newUsername);
                 strcpy(users[userIndex].username, newUsername);
-                strcpy(currentUsername, newUsername); // Update current session
+                strcpy(currentUsername, newUsername);
                 saveUsers(users, *userCount);
-                printf("Username updated successfully!\n");
+                printf("\nUsername updated successfully!\n");
+            }
+        } else if (choice == 2) {
+            printf("\nEnter current password: ");
+            getPassword(currentPassword, sizeof(currentPassword));
+
+            char verifyHash[HASH_LEN];
+            hashPasswordWithSalt(currentPassword, users[userIndex].salt, verifyHash);
+
+            if (strcmp(verifyHash, users[userIndex].passwordHash) != 0) {
+                printf("\nIncorrect current password. Cannot change password.\n");
+                continue;
             }
 
-        } else if (choice == 2) {
-            printf("Enter new password: ");
-            scanf("%s", newPassword);
-            getchar(); // consume newline
+            printf("\nEnter new password: ");
+            getPassword(newPassword, sizeof(newPassword));
+
+            printf("\nConfirm new password: ");
+            getPassword(confirmPassword, sizeof(confirmPassword));
+
+            if (strcmp(newPassword, confirmPassword) != 0) {
+                printf("\nPasswords do not match. Try again.\n");
+                continue;
+            }
 
             generateSalt(newSalt);
             hashPasswordWithSalt(newPassword, newSalt, newHash);
-
             strcpy(users[userIndex].salt, newSalt);
             strcpy(users[userIndex].passwordHash, newHash);
-
             saveUsers(users, *userCount);
-            printf("Password updated successfully!\n");
-
+            printf("\nPassword updated successfully!\n");
         } else if (choice == 3) {
-            printf("Returning to Main Menu...\n");
             return;
         } else {
-            printf("Invalid choice. Try again.\n");
+            printf("\nInvalid choice. Try again.\n");
         }
     }
 }
+
+int deleteUserAccount(User *users, int *userCount, const char *currentUsername) {
+    char confirmation[10];
+    char password[MAX_LEN];
+    int userIndex = -1;
+
+    // Find the user index
+    for (int i = 0; i < *userCount; i++) {
+        if (strcmp(users[i].username, currentUsername) == 0) {
+            userIndex = i;
+            break;
+        }
+    }
+    if (userIndex == -1) {
+        printf("\nUser not found.\n");
+        return 0;
+    }
+
+    while (1) {
+        printf("\nAre you sure you want to delete your account? (yes/no): ");
+        scanf("%s", confirmation);
+        getchar();
+
+        toLowerCase(confirmation);
+
+        if (strcmp(confirmation, "yes") == 0 || strcmp(confirmation, "y") == 0) {
+            break;
+        } else if (strcmp(confirmation, "no") == 0 || strcmp(confirmation, "n") == 0) {
+            printf("\nAccount deletion cancelled.\n");
+            return 0;
+        } else {
+            printf("Invalid input. Please enter 'yes' or 'no'.\n");
+        }
+    }
+
+
+    printf("\nEnter your password to confirm deletion: ");
+    getPassword(password, sizeof(password));
+
+    char verifyHash[HASH_LEN];
+    hashPasswordWithSalt(password, users[userIndex].salt, verifyHash);
+
+    if (strcmp(verifyHash, users[userIndex].passwordHash) != 0) {
+        printf("\nIncorrect password. Account deletion cancelled.\n");
+        return 0;
+    }
+
+    // Delete user from array
+    for (int i = userIndex; i < *userCount - 1; i++) {
+        users[i] = users[i + 1];
+    }
+    (*userCount)--;
+
+    // Save updated users
+    saveUsers(users, *userCount);
+    printf("\nAccount deleted successfully.\n");
+
+    deleteUserFromLeaderboard(currentUsername);
+
+    return 1; // Signal success
+}
+
 
 
 #endif
