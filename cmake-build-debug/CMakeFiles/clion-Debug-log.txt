@@ -1,5 +1,5 @@
 "C:\Program Files\JetBrains\CLion 2024.3.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.3.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S "D:\Actual Schoolwork\TUX\C++\Riddle Quiz Game Test" -B "D:\Actual Schoolwork\TUX\C++\Riddle Quiz Game Test\cmake-build-debug"
--- Configuring done (0.7s)
+-- Configuring done (0.2s)
 CMake Error at CMakeLists.txt:6 (add_executable):
   Cannot find source file:
 
