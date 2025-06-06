@@ -35,13 +35,13 @@ void clearConsole() {
 
 void pause() {
     printf("\n\n\nPress Enter to continue...");
-    getchar(); // Wait for Enter
+    getchar();
 }
 
 void pause2() {
     printf("\n\n\nPress Enter to continue...");
     while(getchar() != '\n');
-    getchar(); // Wait for Enter
+    getchar();
 }
 
 void loadQuestions(const char *filename, Question *questions, int *count) {

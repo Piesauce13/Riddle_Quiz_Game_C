@@ -113,7 +113,6 @@ int loadUsers(User *users) {
     return count;
 }
 
-// Secure password input with * masking
 void getPassword(char *password, size_t maxLength) {
     int i = 0;
     char ch;
