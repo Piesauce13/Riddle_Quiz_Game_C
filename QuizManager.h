@@ -19,6 +19,12 @@ typedef struct {
 #include <time.h>
 #include "Leaderboard.h"
 
+void loadQuestions(const char *filename, Question *questions, int *count);
+void shuffleQuestions(Question *questions, int count);
+int askQuestions(const char *levelName, Question *questions, int count, int startQNum, int *quitFlag);
+void playQuiz(const char *username, Question *easy, int eCount, Question *medium, int mCount, Question *hard, int hCount);
+
+
 void clearConsole() {
 #ifdef _WIN32
     system("cls");

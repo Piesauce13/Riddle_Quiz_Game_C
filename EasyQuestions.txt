@@ -1,7 +1,7 @@
-1,What has to be broken before you can use it?,An egg,A mirror,A pencil,A
+1,What has to be broken before you can use it?,A mirror,A pencil,An egg,C
 2,What month of the year has 28 days?,February,All of them,April,B
 3,What is full of holes but still holds water?,A sponge,A net,A bucket,A
-4,What has four wheels and flies?,A garbage truck,An airplane,A race car,A
+4,What has four wheels and flies?,An airplane,A race car,A garbage truck,C
 5,What has a bottom at the top?,A leg,A hat,A chair,A
 6,What gets wetter the more it dries?,A towel,A sponge,A cloud,A
 7,What has hands but cannot clap?,A clock,A robot,A ghost,A

@@ -8,6 +8,7 @@
 #include <wincrypt.h>
 #include <conio.h>
 #include "Leaderboard.h"
+#include "QuizManager.h"
 
 #define MAX_USERS 100
 #define MAX_LEN 50
@@ -21,7 +22,6 @@ typedef struct {
     char passwordHash[HASH_LEN];
 } User;
 
-// Function Prototypes
 void toLowerCase(char *str);
 void generateSalt(char *salt);
 void hashPasswordWithSalt(const char *password, const char *salt, char *outputHash);
@@ -148,6 +148,7 @@ void signUp(User *users, int *userCount) {
     for (int i = 0; i < *userCount; i++) {
         if (strcmp(users[i].username, username) == 0) {
             printf("\nUsername already exists. Try again.\n");
+            pause();
             return;
         }
     }
@@ -346,7 +347,6 @@ int deleteUserAccount(User *users, int *userCount, const char *currentUsername) 
     // Save updated users
     saveUsers(users, *userCount);
     printf("\nAccount deleted successfully.\n");
-
     deleteUserFromLeaderboard(currentUsername);
 
     return 1; // Signal success

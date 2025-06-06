@@ -1,5 +1,6 @@
 #ifndef LEADERBOARD_H
 #define LEADERBOARD_H
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,12 +11,11 @@ extern double timeTaken;
 
 void loadLeaderboard();
 void saveLeaderboard();
-void updateScore(char* username, int newScore, const char* newTimeTaken);
-void updateUsernameInLeaderboard(const char* newUsername, int score, double timeTaken);
+void updateScore(char* username, int newScore, double newTimeTaken);
+void updateUsernameInLeaderboard(const char* newUsername, const char* oldUsername);
+int compareEntries(const void* a, const void* b);
 void showLeaderboard();
 void showUserHighscore();
-int compareScores();
-void updateLeaderbaord();
 void deleteUserFromLeaderboard(const char *username);
 
 void loadLeaderboard() {
@@ -94,7 +94,6 @@ void updateScore(char* username, int newScore, double newTimeTaken) {
 
     fclose(file);
 }
-
 
 void updateUsernameInLeaderboard(const char *oldUsername, const char *newUsername) {
     LeaderboardEntry leaderboard[MAX_LEADERBOARD_ENTRIES];
@@ -270,8 +269,6 @@ void deleteUserFromLeaderboard(const char *username) {
                 leaderboard[i].timeTaken);
     }
     fclose(file);
-
-    printf("Deleted %s's entries from leaderboard.\n", username);
 }
 
 
